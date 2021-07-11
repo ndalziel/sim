@@ -14,6 +14,8 @@ def Simulate(alpha,gamma,N, seed):
     ChainLength=0
     # the revenue of the selfish mining pool
     SelfishRevenue=0
+    # hidden blocks
+    HiddenBlocks=0
 
     #A round begin when the state=0
     for i in range(N):
@@ -24,20 +26,27 @@ def Simulate(alpha,gamma,N, seed):
                 #The selfish pool mines a block.
                 #They don't publish it. 
                 state=1
+                HiddenBlocks=1
             else:
                 #The honest miners found a block.
                 #The round is finished : the honest miners found 1 block
                 # and the selfish miners found 0 block.
                 ChainLength+=1
+                HiddenBlocks=0
                 state=0
 
         elif state==1:
             #The selfish pool has 1 hidden block.
             if r<=alpha:
+                state=2
+                HiddenBlocks=2
                 #The selfish miners found a new block.
                 #Write a piece of code to change the required variables.
                 #You might need to define new variable to keep track of the number of hidden blocks.
             else:
+                state=-1
+                ChainLength+=1
+                HiddenBlocks=0
                 #Write a piece of code to change the required variables.
 
         elif state==-1:
@@ -45,41 +54,37 @@ def Simulate(alpha,gamma,N, seed):
             #There are three situations! 
             #Write a piece of code to change the required variables in each one.
             if r<=alpha:
-
+                SelfishRevenue+=2   
             elif r<=alpha+(1-alpha)*gamma:
-
+                SelfishRevenue+=1
             else:
-
-
+                SelfishRevenue+=0   
+            HiddenBlocks=0
+            state = 0
+            ChainLength+=1
         elif state==2:
             #The selfish pool has 2 hidden block.
             if r<=alpha:
-
+                state+=1
+                HiddenBlocks+=1
             else:
+                state = 0
+                SelfishRevenue+=2
+                ChainLength+=2
+                HiddenBlocks=0
                 #The honest miners found a block.
 
         elif state>2:
             if r<=alpha:
+                state+=1
+                HiddenBlocks+=1
                 #The selfish miners found a new block
 
             else:
+                state = state - 1
+                SelfishRevenue+=1
+                HiddenBlocks=HiddenBlocks-1
+                ChainLength+=1
                 #The honest miners found a block
 
     return float(SelfishRevenue)/ChainLength
-
-
-""" 
-  Uncomment out the following lines to try out your code
-  DON'T include it in your final submission though.
-"""
-
-"""
-#let's run the code with the follwing parameters!
-alpha=0.35
-gamma=0.5
-Nsimu=10**7
-seed = 100
-#This is the theoretical probability computed in the original paper
-print("Theoretical probability :",(alpha*(1-alpha)**2*(4*alpha+gamma*(1-2*alpha))-alpha**3)/(1-alpha*(1+(2-alpha)*alpha)))
-print("Simulated probability :",Simulate(alpha,gamma,Nsimu, seed))
-"""
